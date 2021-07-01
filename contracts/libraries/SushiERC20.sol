@@ -2,6 +2,7 @@
 
 pragma solidity 0.6.12;
 
+import "../interfaces/IDAIPermit.sol";
 import "../interfaces/IERC20.sol";
 
 /// @title SushiERC20
@@ -153,6 +154,6 @@ library SushiERC20 {
         bytes32 r,
         bytes32 s
     ) public {
-        IERC20(token).daiPermit(msg.sender, address(this), nonce, expiry, true, v, r, s);
+        IDAIPermit(token).permit(msg.sender, address(this), nonce, expiry, true, v, r, s);
     }
 }
