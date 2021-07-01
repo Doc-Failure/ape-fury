@@ -3,6 +3,8 @@
 pragma solidity 0.7.6;
 pragma experimental ABIEncoderV2;
 
+import './IERC20.sol';
+
 // helper methods for interacting with ERC20 tokens and sending ETH that do not consistently return true/false
 
 library TransferHelper {
