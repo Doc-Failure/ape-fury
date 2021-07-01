@@ -7,7 +7,7 @@ import './interfaces/IUniswapV2Factory.sol';
 import './interfaces/IUniswapV2Pair.sol';
 import './2x/IUniswapV2Router02x.sol';
 import './interfaces/IWETH.sol';
-import '../utils/BoringBatchableWithDai.sol';
+import './2x/BoringBatchableWithDai.sol';
 import './2x/SafeMath.sol';
 import './libraries/UniswapV2Library.sol';
 import './2x/TransferHelper.sol';
