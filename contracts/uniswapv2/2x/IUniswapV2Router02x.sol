@@ -4,6 +4,7 @@ pragma solidity 0.7.6;
 pragma experimental ABIEncoderV2;
 
 interface IUniswapV2Router01x {
+    event Routed(uint16 referralCode);
     function factory() external view returns (address);
     function WETH() external view returns (address);
 
