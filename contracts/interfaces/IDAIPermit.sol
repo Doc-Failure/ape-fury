@@ -3,7 +3,7 @@
 pragma solidity 0.6.12;
 
 /// @title IDAIPermit
-/// @dev This interface composes DAI-derived {permit}.
+/// @notice This interface composes DAI-derived {permit}.
 interface IDAIPermit {
     /// @dev DAI-derived {permit}.
     function daiPermit(
