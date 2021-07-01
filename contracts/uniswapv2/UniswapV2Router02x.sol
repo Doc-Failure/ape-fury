@@ -3,24 +3,22 @@
 pragma solidity 0.7.6;
 pragma experimental ABIEncoderV2;
 
-import './UniswapV2Pair.sol';
-import './libraries/UniswapV2Library.sol';
-import './2x/SafeMath.sol';
-import './2x/TransferHelper.sol';
-import './2x/IUniswapV2Router02x.sol';
 import './interfaces/IUniswapV2Factory.sol';
-import '../interfaces/IERC20.sol';
-import '../interfaces/IDaiPermit.sol';
+import './interfaces/IUniswapV2Pair.sol';
+import './2x/IUniswapV2Router02x.sol';
 import './interfaces/IWETH.sol';
 import '../utils/BoringBatchableWithDai.sol';
+import './2x/SafeMath.sol';
+import './libraries/UniswapV2Library.sol';
+import './2x/TransferHelper.sol';
 
 /// @notice SushiSwap router with minor refactoring for compiler bump, gas-optimization and {batch} functionality.
-contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
+contract UniswapV2Router02x is IUniswapV2Router02x, BoringBatchableWithDai {
     using SafeMath for uint;
 
     address public immutable override factory;
     address public immutable override WETH;
-
+    
     modifier ensure(uint deadline) {
         require(deadline >= block.timestamp, 'UniswapV2Router: EXPIRED');
         _;
@@ -42,7 +40,8 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
         uint amountADesired,
         uint amountBDesired,
         uint amountAMin,
-        uint amountBMin
+        uint amountBMin,
+        uint16 referralCode
     ) internal virtual returns (uint amountA, uint amountB) {
         // create the pair if it doesn't exist yet
         if (IUniswapV2Factory(factory).getPair(tokenA, tokenB) == address(0)) {
@@ -63,6 +62,7 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
                 (amountA, amountB) = (amountAOptimal, amountBDesired);
             }
         }
+        emit Routed(referralCode);
     }
     function addLiquidity(
         address tokenA,
@@ -72,9 +72,10 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
         uint amountAMin,
         uint amountBMin,
         address to,
-        uint deadline
+        uint deadline,
+        uint16 referralCode
     ) external virtual override ensure(deadline) returns (uint amountA, uint amountB, uint liquidity) {
-        (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
+        (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin, referralCode);
         address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
         TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
         TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
@@ -86,7 +87,8 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
         uint amountTokenMin,
         uint amountETHMin,
         address to,
-        uint deadline
+        uint deadline,
+        uint16 referralCode
     ) external virtual override payable ensure(deadline) returns (uint amountToken, uint amountETH, uint liquidity) {
         (amountToken, amountETH) = _addLiquidity(
             token,
@@ -94,7 +96,8 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
             amountTokenDesired,
             msg.value,
             amountTokenMin,
-            amountETHMin
+            amountETHMin,
+            referralCode
         );
         address pair = UniswapV2Library.pairFor(factory, token, WETH);
         TransferHelper.safeTransferFrom(token, msg.sender, pair, amountToken);
@@ -215,7 +218,7 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
 
     // **** SWAP ****
     // requires the initial amount to have already been sent to the first pair
-    function _swap(uint[] memory amounts, address[] memory path, address _to) internal virtual {
+    function _swap(uint[] memory amounts, address[] memory path, address _to, uint16 referralCode) internal virtual {
         for (uint i; i < path.length - 1; i++) {
             (address input, address output) = (path[i], path[i + 1]);
             (address token0,) = UniswapV2Library.sortTokens(input, output);
@@ -226,36 +229,39 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
                 amount0Out, amount1Out, to, new bytes(0)
             );
         }
+        emit Routed(referralCode);
     }
     function swapExactTokensForTokens(
         uint amountIn,
         uint amountOutMin,
         address[] calldata path,
         address to,
-        uint deadline
+        uint deadline,
+        uint16 referralCode
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
         amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path);
         require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
         );
-        _swap(amounts, path, to);
+        _swap(amounts, path, to, referralCode);
     }
     function swapTokensForExactTokens(
         uint amountOut,
         uint amountInMax,
         address[] calldata path,
         address to,
-        uint deadline
+        uint deadline,
+        uint16 referralCode
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
         amounts = UniswapV2Library.getAmountsIn(factory, amountOut, path);
         require(amounts[0] <= amountInMax, 'UniswapV2Router: EXCESSIVE_INPUT_AMOUNT');
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
         );
-        _swap(amounts, path, to);
+        _swap(amounts, path, to, referralCode);
     }
-    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
+    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline, uint16 referralCode)
         external
         virtual
         override
@@ -268,9 +274,9 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
         require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
         IWETH(WETH).deposit{value: amounts[0]}();
         assert(IWETH(WETH).transfer(UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]));
-        _swap(amounts, path, to);
+        _swap(amounts, path, to, referralCode);
     }
-    function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
+    function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline, uint16 referralCode)
         external
         virtual
         override
@@ -283,11 +289,11 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
         );
-        _swap(amounts, path, address(this));
+        _swap(amounts, path, address(this), referralCode);
         IWETH(WETH).withdraw(amounts[amounts.length - 1]);
         TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
     }
-    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline, uint16 referralCode)
         external
         virtual
         override
@@ -300,11 +306,11 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
         );
-        _swap(amounts, path, address(this));
+        _swap(amounts, path, address(this), referralCode);
         IWETH(WETH).withdraw(amounts[amounts.length - 1]);
         TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
     }
-    function swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
+    function swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline, uint16 referralCode)
         external
         virtual
         override
@@ -317,14 +323,14 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
         require(amounts[0] <= msg.value, 'UniswapV2Router: EXCESSIVE_INPUT_AMOUNT');
         IWETH(WETH).deposit{value: amounts[0]}();
         assert(IWETH(WETH).transfer(UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]));
-        _swap(amounts, path, to);
+        _swap(amounts, path, to, referralCode);
         // refund dust eth, if any
         if (msg.value > amounts[0]) TransferHelper.safeTransferETH(msg.sender, msg.value - amounts[0]);
     }
 
     // **** SWAP (supporting fee-on-transfer tokens) ****
     // requires the initial amount to have already been sent to the first pair
-    function _swapSupportingFeeOnTransferTokens(address[] memory path, address _to) internal virtual {
+    function _swapSupportingFeeOnTransferTokens(address[] memory path, address _to, uint16 referralCode) internal virtual {
         for (uint i; i < path.length - 1; i++) {
             (address input, address output) = (path[i], path[i + 1]);
             (address token0,) = UniswapV2Library.sortTokens(input, output);
@@ -341,19 +347,21 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
             address to = i < path.length - 2 ? UniswapV2Library.pairFor(factory, output, path[i + 2]) : _to;
             pair.swap(amount0Out, amount1Out, to, new bytes(0));
         }
+        emit Routed(referralCode);
     }
     function swapExactTokensForTokensSupportingFeeOnTransferTokens(
         uint amountIn,
         uint amountOutMin,
         address[] calldata path,
         address to,
-        uint deadline
+        uint deadline,
+        uint16 referralCode
     ) external virtual override ensure(deadline) {
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amountIn
         );
         uint balanceBefore = TransferHelper.safeBalanceOf(IERC20(path[path.length - 1]), to);
-        _swapSupportingFeeOnTransferTokens(path, to);
+        _swapSupportingFeeOnTransferTokens(path, to, referralCode);
         require(
             TransferHelper.safeBalanceOf(IERC20(path[path.length - 1]), to).sub(balanceBefore) >= amountOutMin,
             'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT'
@@ -363,7 +371,8 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
         uint amountOutMin,
         address[] calldata path,
         address to,
-        uint deadline
+        uint deadline,
+        uint16 referralCode
     )
         external
         virtual
@@ -376,7 +385,7 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
         IWETH(WETH).deposit{value: amountIn}();
         assert(IWETH(WETH).transfer(UniswapV2Library.pairFor(factory, path[0], path[1]), amountIn));
         uint balanceBefore = TransferHelper.safeBalanceOf(IERC20(path[path.length - 1]), to);
-        _swapSupportingFeeOnTransferTokens(path, to);
+        _swapSupportingFeeOnTransferTokens(path, to, referralCode);
         require(
             TransferHelper.safeBalanceOf(IERC20(path[path.length - 1]), to).sub(balanceBefore) >= amountOutMin,
             'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT'
@@ -387,7 +396,8 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
         uint amountOutMin,
         address[] calldata path,
         address to,
-        uint deadline
+        uint deadline,
+        uint16 referralCode
     )
         external
         virtual
@@ -398,7 +408,7 @@ contract UniswapV2Router02x is IUniswapV2Router02, BoringBatchableWithDai {
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amountIn
         );
-        _swapSupportingFeeOnTransferTokens(path, address(this));
+        _swapSupportingFeeOnTransferTokens(path, address(this), referralCode);
         uint amountOut = TransferHelper.safeBalanceOfSelf(IERC20(WETH));
         require(amountOut >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
         IWETH(WETH).withdraw(amountOut);
