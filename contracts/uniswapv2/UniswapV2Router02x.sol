@@ -9,7 +9,7 @@ import './2x/IUniswapV2Router02x.sol';
 import './interfaces/IWETH.sol';
 import './2x/BoringBatchableWithDai.sol';
 import './2x/SafeMath.sol';
-import './libraries/UniswapV2Library.sol';
+import './2x/UniswapV2Library.sol';
 import './2x/TransferHelper.sol';
 
 /// @notice SushiSwap router with minor refactoring for compiler bump, gas-optimization and {batch} functionality.
