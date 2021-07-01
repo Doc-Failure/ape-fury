@@ -6,7 +6,7 @@ pragma solidity 0.6.12;
 /// @notice This interface composes DAI-derived {permit}.
 interface IDAIPermit {
     /// @dev DAI-derived {permit}.
-    function daiPermit(
+    function permit(
         address holder,
         address spender,
         uint256 nonce,
