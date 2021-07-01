@@ -3,7 +3,7 @@
 pragma solidity 0.6.12;
 
 /// @title IERC20
-/// @dev This interface optimizes around ERC-20 token calls.
+/// @notice This interface composes ERC-20 token calls with common extensions.
 interface IERC20 {
     function totalSupply() external view returns (uint256);
     function balanceOf(address account) external view returns (uint256);
@@ -18,18 +18,6 @@ interface IERC20 {
         address spender,
         uint256 value,
         uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external;
-    
-    /// @dev DAI-derived {permit}.
-    function daiPermit(
-        address holder,
-        address spender,
-        uint256 nonce,
-        uint256 expiry,
-        bool allowed,
         uint8 v,
         bytes32 r,
         bytes32 s
