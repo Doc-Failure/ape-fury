@@ -3,7 +3,6 @@
 pragma solidity 0.7.6;
 pragma experimental ABIEncoderV2;
 
-/// @dev Minor adaptation on `factory` and `WETH` to help conform to compiler bump.
 interface IUniswapV2Router01x {
     function factory() external view returns (address);
     function WETH() external view returns (address);
@@ -16,7 +15,8 @@ interface IUniswapV2Router01x {
         uint amountAMin,
         uint amountBMin,
         address to,
-        uint deadline
+        uint deadline,
+        uint16 referralCode
     ) external returns (uint amountA, uint amountB, uint liquidity);
     function addLiquidityETH(
         address token,
@@ -24,7 +24,8 @@ interface IUniswapV2Router01x {
         uint amountTokenMin,
         uint amountETHMin,
         address to,
-        uint deadline
+        uint deadline,
+        uint16 referralCode
     ) external payable returns (uint amountToken, uint amountETH, uint liquidity);
     function removeLiquidity(
         address tokenA,
@@ -67,26 +68,28 @@ interface IUniswapV2Router01x {
         uint amountOutMin,
         address[] calldata path,
         address to,
-        uint deadline
+        uint deadline,
+        uint16 referralCode
     ) external returns (uint[] memory amounts);
     function swapTokensForExactTokens(
         uint amountOut,
         uint amountInMax,
         address[] calldata path,
         address to,
-        uint deadline
+        uint deadline,
+        uint16 referralCode
     ) external returns (uint[] memory amounts);
-    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
+    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline, uint16 referralCode)
         external
         payable
         returns (uint[] memory amounts);
-    function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
+    function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline, uint16 referralCode)
         external
         returns (uint[] memory amounts);
-    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline, uint16 referralCode)
         external
         returns (uint[] memory amounts);
-    function swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
+    function swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline, uint16 referralCode)
         external
         payable
         returns (uint[] memory amounts);
@@ -122,19 +125,22 @@ interface IUniswapV2Router02x is IUniswapV2Router01x {
         uint amountOutMin,
         address[] calldata path,
         address to,
-        uint deadline
+        uint deadline,
+        uint16 referralCode
     ) external;
     function swapExactETHForTokensSupportingFeeOnTransferTokens(
         uint amountOutMin,
         address[] calldata path,
         address to,
-        uint deadline
+        uint deadline,
+        uint16 referralCode
     ) external payable;
     function swapExactTokensForETHSupportingFeeOnTransferTokens(
         uint amountIn,
         uint amountOutMin,
         address[] calldata path,
         address to,
-        uint deadline
+        uint deadline,
+        uint16 referralCode
     ) external;
 }
