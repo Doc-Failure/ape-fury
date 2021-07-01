@@ -3,6 +3,9 @@
 pragma solidity 0.7.6;
 pragma experimental ABIEncoderV2;
 
+import '../interfaces/IERC20.sol';
+import '../interfaces/IDAIPermit.sol';
+
 // File @boringcrypto/boring-solidity/contracts/BoringBatchable.sol@v1.2.0
 // License-Identifier: MIT
 contract BaseBoringBatchable {
@@ -36,7 +39,7 @@ contract BaseBoringBatchable {
 contract BoringBatchableWithDai is BaseBoringBatchable {
     /// @notice Call wrapper that performs `ERC20.permit` using DAI-derived EIP-2612 primitive.
     function permitDai(
-        IDaiPermit token,
+        IDAIPermit token,
         address holder,
         address spender,
         uint256 nonce,
