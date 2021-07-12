@@ -5,7 +5,7 @@ import {ethers} from "hardhat"
 
 describe("MiniChefV2", function () {
   before(async function () {
-    await prepare(this, ['MiniChefV2', 'SushiToken', 'ERC20Mock', 'RewarderMock', 'RewarderBrokenMock'])
+    await prepare(this, ['MiniChefV2', 'SushiToken', 'ERC20Mock', 'RewarderMock', 'RewarderBrokenMock', 'TemplateRewarderTime'])
     await deploy(this, [
       ["brokenRewarder", this.RewarderBrokenMock]
     ])
@@ -24,6 +24,7 @@ describe("MiniChefV2", function () {
       ["r", this.ERC20Mock, ["Reward", "RewardT", getBigNumber(100000)]],
     ])
     await deploy(this, [["rewarder", this.RewarderMock, [getBigNumber(1), this.r.address, this.chef.address]]])
+    await deploy(this, [["rewarderTemplate", this.TemplateRewarderTime, [this.r.address, getBigNumber(3), this.chef.address]]])
 
     await this.sushi.mint(this.chef.address, getBigNumber(10000))
     await this.lp.approve(this.chef.address, getBigNumber(10))
@@ -187,6 +188,19 @@ describe("MiniChefV2", function () {
         expect((await this.chef.userInfo(0, this.alice.address)).rewardDebt).to.be.equal("-"+expectedSushi)
         await this.chef.harvest(0, this.alice.address)
         expect(await this.sushi.balanceOf(this.alice.address)).to.be.equal(await this.r.balanceOf(this.alice.address)).to.be.equal(expectedSushi)
+    })
+    it("Harvest from TemplateRewarderTime", async function () {
+      await this.r.transfer(this.rewarderTemplate.address, getBigNumber(100000))
+      await this.chef.add(10, this.rlp.address, this.rewarderTemplate.address)
+      await this.rlp.approve(this.chef.address, getBigNumber(10))
+      let log = await this.chef.deposit(0, getBigNumber(1), this.alice.address)
+      await advanceTime(5000)
+      let log2 = await this.chef.withdraw(0, getBigNumber(1), this.alice.address)
+      let timestamp2 = (await ethers.provider.getBlock(log2.blockNumber)).timestamp
+      let timestamp = (await ethers.provider.getBlock(log.blockNumber)).timestamp
+      let expectedReward = getBigNumber(3).mul(timestamp2 - timestamp)
+      await this.chef.harvest(0, this.alice.address)
+      expect(await this.r.balanceOf(this.alice.address)).to.be.equal(expectedReward)
     })
     it("Harvest with empty user balance", async function () {
       await this.chef.add(10, this.rlp.address, this.rewarder.address)

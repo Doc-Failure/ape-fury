@@ -3,7 +3,7 @@ import { advanceBlockTo, advanceBlock, prepare, deploy, getBigNumber, ADDRESS_ZE
 
 describe("MasterChefV2", function () {
   before(async function () {
-    await prepare(this, ['MasterChef', 'SushiToken', 'ERC20Mock', 'MasterChefV2', 'RewarderMock', 'RewarderBrokenMock'])
+    await prepare(this, ['MasterChef', 'SushiToken', 'ERC20Mock', 'MasterChefV2', 'RewarderMock', 'RewarderBrokenMock', 'TemplateRewarder'])
     await deploy(this, [
       ["brokenRewarder", this.RewarderBrokenMock]
     ])
@@ -32,6 +32,7 @@ describe("MasterChefV2", function () {
         ["r", this.ERC20Mock, ["Reward", "RewardT", getBigNumber(100000)]],
     ])
     await deploy(this, [["rewarder", this.RewarderMock, [getBigNumber(1), this.r.address, this.chef2.address]]])
+    await deploy(this, [["rewarderTemplate", this.TemplateRewarder, [this.r.address, getBigNumber(3), this.chef2.address]]])
     await this.dummy.approve(this.chef2.address, getBigNumber(10))
     await this.chef2.init(this.dummy.address)
     await this.rlp.transfer(this.bob.address, getBigNumber(1))
@@ -214,6 +215,20 @@ describe("MasterChefV2", function () {
       expect((await this.chef2.userInfo(0, this.alice.address)).rewardDebt).to.be.equal("-"+expectedSushi)
       await this.chef2.harvest(0, this.alice.address)
       expect(await this.sushi.balanceOf(this.alice.address)).to.be.equal(expectedSushi)
+    })
+
+    it("Harvest for TemplateRewarder", async function () {
+      await this.r.transfer(this.rewarderTemplate.address, getBigNumber(100000))
+      await this.chef2.add(10, this.rlp.address, this.rewarderTemplate.address)
+      await this.rlp.approve(this.chef2.address, getBigNumber(10))
+      expect(await this.chef2.lpToken(0)).to.be.equal(this.rlp.address)
+      let log = await this.chef2.deposit(0, getBigNumber(1), this.alice.address)
+      await advanceBlockTo(20)
+      await this.chef2.harvestFromMasterChef()
+      let log2 = await this.chef2.withdraw(0, getBigNumber(1), this.alice.address)
+      let expectedReward = getBigNumber(3).mul(log2.blockNumber - log.blockNumber)
+      await this.chef2.harvest(0, this.alice.address)
+      expect(await this.r.balanceOf(this.alice.address)).to.be.equal(expectedReward)
     })
   })
 
