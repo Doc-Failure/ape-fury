@@ -77,8 +77,8 @@ contract TemplateRewarder is IRewarder,  BoringOwnable{
         return (_rewardTokens, _rewardAmounts);
     }
 
-    /// @notice Sets the sushi per second to be distributed. Can only be called by the owner.
-    /// @param _rewardPerBlock The amount of Sushi to be distributed per block.
+    /// @notice Sets the reward per second to be distributed. Can only be called by the owner.
+    /// @param _rewardPerBlock The amount of Reward Token to be distributed per block.
     function setRewardPerBlock(uint256 _rewardPerBlock) public onlyOwner {
         rewardPerBlock = _rewardPerBlock;
         emit LogRewardPerBlock(_rewardPerBlock);
@@ -95,7 +95,7 @@ contract TemplateRewarder is IRewarder,  BoringOwnable{
     /// @notice View function to see pending Token
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _user Address of user.
-    /// @return pending SUSHI reward for a given user.
+    /// @return pending reward tokens for a given user.
     function pendingToken(uint256 _pid, address _user) public view returns (uint256 pending) {
         PoolInfo memory pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];

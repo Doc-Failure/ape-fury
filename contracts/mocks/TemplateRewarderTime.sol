@@ -25,8 +25,6 @@ contract TemplateRewarderTime is IRewarder,  BoringOwnable{
     }
 
     /// @notice Info of each MCV2 pool.
-    /// `allocPoint` The amount of allocation points assigned to the pool.
-    /// Also known as the amount of SUSHI to distribute per block.
     struct PoolInfo {
         uint128 accTokenPerShare;
         uint64 lastRewardTime;
@@ -76,8 +74,8 @@ contract TemplateRewarderTime is IRewarder,  BoringOwnable{
         return (_rewardTokens, _rewardAmounts);
     }
 
-    /// @notice Sets the sushi per second to be distributed. Can only be called by the owner.
-    /// @param _rewardPerSecond The amount of Sushi to be distributed per second.
+    /// @notice Sets the reward per second to be distributed. Can only be called by the owner.
+    /// @param _rewardPerSecond The amount of reward tokens to be distributed per second.
     function setRewardPerSecond(uint256 _rewardPerSecond) public onlyOwner {
         rewardPerSecond = _rewardPerSecond;
         emit LogRewardPerSecond(_rewardPerSecond);
@@ -94,7 +92,7 @@ contract TemplateRewarderTime is IRewarder,  BoringOwnable{
     /// @notice View function to see pending Token
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _user Address of user.
-    /// @return pending SUSHI reward for a given user.
+    /// @return pending Reward Token reward for a given user.
     function pendingToken(uint256 _pid, address _user) public view returns (uint256 pending) {
         PoolInfo memory pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
