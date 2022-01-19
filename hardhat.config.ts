@@ -19,7 +19,7 @@ import { HardhatUserConfig } from "hardhat/types"
 import { removeConsoleLog } from "hardhat-preprocessor"
 
 const accounts = {
-  mnemonic: process.env.MNEMONIC || "test test test test test test test test test test test junk",
+  mnemonic: process.env.MNEMONIC || "hurdle slice east vendor trust hood typical broccoli face armed render country",
   // accountsBalance: "990000000000000000000",
 }
 
@@ -56,6 +56,18 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
+    aurora_testnet: {
+      url: 'https://testnet.aurora.dev',
+      accounts,
+      chainId: 1313161555,
+      gasPrice: 5000000000,
+    },
+    aurora_local: {
+      url: 'http://localhost:8545',
+      accounts,
+      chainId: 1313161555,
+      gasPrice: 5000000000,
+    },
     mainnet: {
       url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
       accounts,
