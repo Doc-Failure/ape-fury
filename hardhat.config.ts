@@ -27,8 +27,9 @@ const config: HardhatUserConfig = {
   abiExporter: {
     path: "./abi",
     clear: false,
-    flat: true,
-    // only: [],
+    //originally flat was true, but I had some problem using this tool with flat setted to true
+    flat: false,
+    //only: [],
     // except: []
   },
   defaultNetwork: "hardhat",
