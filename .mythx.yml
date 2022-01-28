@@ -21,3 +21,5 @@ analyze:
         - contracts/MasterChef.sol:MasterChef
         - contracts/governance/Timelock.sol:Timelock
         - contracts/Migrator.sol:Migrator
+        - contracts/ERC20Token.sol:ERC20Token
+        - contracts/ERC20TokenFactory.sol:ERC20TokenFactory
