@@ -1,4 +1,4 @@
-const { WETH9 } = require("@doc_failure/sushiswap-sdk")
+const { WETH9 } = require("@sushiswap/sdk")
 
 module.exports = async function ({ ethers: { getNamedSigner }, getNamedAccounts, deployments }) {
   const { deploy } = deployments
