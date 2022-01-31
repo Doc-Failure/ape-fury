@@ -1,15 +1,21 @@
 // SPDX-License-Identifier: MIT
+pragma experimental ABIEncoderV2;
 pragma solidity 0.6.12;
 import "./ERC20Token.sol";
 
 contract ERC20TokenFactory {
 
+  struct tokenStruct{ 
+    string _symbol;
+    string _name;
+    address _address;
+  }
   // index of created contracts
   mapping(address => address) public lastDeployedContract;
 
-  address[] public contracts;
+  tokenStruct[] public contracts;
 
-  function getContracts() public view returns(address[] memory){
+  function getContracts() public view returns(tokenStruct[] memory){
     return contracts;
   }
 
@@ -21,7 +27,12 @@ contract ERC20TokenFactory {
   function deployNewToken(string memory name, string memory symbol, uint initialSupply) public{
     ERC20Token token = new ERC20Token(name,symbol,initialSupply);
     address contractAddress = address(token);
-    contracts.push(contractAddress);
+    tokenStruct memory tokenToInsert;
+    tokenToInsert._name = name;
+    tokenToInsert._symbol = symbol;
+    tokenToInsert._address = contractAddress;
+    
+    contracts.push(tokenToInsert);
     lastDeployedContract[msg.sender]=contractAddress;
 
     token.transfer(msg.sender, token.totalSupply());
