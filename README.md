@@ -1,10 +1,4 @@
-# SushiSwap
-
-https://sushi.com/
-
-## Deployed Contracts
-
-https://dev.sushi.com/sushiswap/contracts
+A Sushiswap fork for the Aurora Network
 
 ## Docs
 
