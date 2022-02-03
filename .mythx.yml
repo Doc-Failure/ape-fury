@@ -23,3 +23,4 @@ analyze:
         - contracts/Migrator.sol:Migrator
         - contracts/ERC20Token.sol:ERC20Token
         - contracts/ERC20TokenFactory.sol:ERC20TokenFactory
+        - contracts/ERC20TokenLauncher.sol:ERC20TokenLauncher
