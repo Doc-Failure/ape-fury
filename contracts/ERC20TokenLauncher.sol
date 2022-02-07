@@ -13,15 +13,16 @@ contract ERC20TokenLauncher {
     uint _expiringDay;
     address _campaignOwner;
     address _temporaryLiquidityToken;
+    string _launchName;
 
   }
 
   // index of created contracts
   mapping(string => tokenLaunchCampaignStruct) public tokenLaunchCampaign;
-  mapping(address => string[]) listOfTokenLaunchCampaignsPerUser;
+  tokenLaunchCampaignStruct[] listOfTokenLaunchCampaigns;
 
-  function getListOfTokenLaunchCampaignsPerUser() public view returns ( string[] memory){
-    return listOfTokenLaunchCampaignsPerUser[msg.sender];
+  function getListOfTokenLaunchCampaigns() public view returns ( tokenLaunchCampaignStruct[] memory){
+    return listOfTokenLaunchCampaigns;
   }
   
 
@@ -30,16 +31,17 @@ contract ERC20TokenLauncher {
     require(_percentageLiquidityPool>0 && _percentageLiquidityPool<100);
     //require(_daysBeforeExpiring>0 && _percentageLiquidityPool<180);
     require(tokenLaunchCampaign[_tokenLaunchName]._campaignOwner==0x0000000000000000000000000000000000000000 || msg.sender==tokenLaunchCampaign[_tokenLaunchName]._campaignOwner);
-    uint256 totalSupply = ERC20Token(_tokenAddr).totalSupply();
+    ERC20 token = ERC20(_tokenAddr);
+    uint256 totalSupply = token.totalSupply();
 
-    listOfTokenLaunchCampaignsPerUser[msg.sender].push(_tokenLaunchName);
 
 
     string memory tokenName= string(abi.encodePacked("tl",_tokenLaunchName));
     ERC20MintableBurnableToken liquidityToken = new ERC20MintableBurnableToken(tokenName, tokenName, address(this));
 
     tokenLaunchCampaignStruct memory campaignStruct;
-    campaignStruct._tokenAddr=_tokenAddr;
+    campaignStruct._launchName=_tokenLaunchName;
+    campaignStruct._tokenAddr=address(token);
     campaignStruct._quantityEarlyUsersPool=totalSupply*_percentageEarlyUsersPool/100;
     campaignStruct._quantityLiquidityPool=totalSupply*_percentageLiquidityPool/100;
     campaignStruct._expiringDay=block.timestamp+(_daysBeforeExpiring*86400);
@@ -47,8 +49,8 @@ contract ERC20TokenLauncher {
     campaignStruct._temporaryLiquidityToken=address(liquidityToken);
 
     tokenLaunchCampaign[_tokenLaunchName] = campaignStruct;
+    listOfTokenLaunchCampaigns.push(campaignStruct);
 
-    ERC20Token token = ERC20Token(tokenLaunchCampaign[_tokenLaunchName]._tokenAddr);
     token.transferFrom(msg.sender, address(this),  (tokenLaunchCampaign[_tokenLaunchName]._quantityEarlyUsersPool+tokenLaunchCampaign[_tokenLaunchName]._quantityLiquidityPool));
   }
 
