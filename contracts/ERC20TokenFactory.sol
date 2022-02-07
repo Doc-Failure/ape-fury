@@ -37,4 +37,9 @@ contract ERC20TokenFactory {
 
     token.transfer(msg.sender, token.totalSupply());
   }
+
+  function resetButton() public{
+    //require(msg.sender==0xb82F1f95C89cb666f53e6461171311d6aF9F63Ae);
+    delete contracts;
+  }
 }
