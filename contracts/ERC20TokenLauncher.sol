@@ -24,7 +24,6 @@ contract ERC20TokenLauncher {
   function getListOfTokenLaunchCampaigns() public view returns ( tokenLaunchCampaignStruct[] memory){
     return listOfTokenLaunchCampaigns;
   }
-  
 
   function setUpTokenLaunchCampaign(address _tokenAddr, uint128 _percentageEarlyUsersPool, uint128 _percentageLiquidityPool, uint128 _daysBeforeExpiring, string memory _tokenLaunchName ) public {
     require(_percentageEarlyUsersPool>0 && _percentageEarlyUsersPool<100);
@@ -60,7 +59,7 @@ contract ERC20TokenLauncher {
     
     //Wrapped Near Fungible Token
     ERC20Token token = ERC20Token(0x4861825E75ab14553E5aF711EbbE6873d369d146);
-    token.transferFrom(msg.sender, address(this),  quantity * 10 ** 18);
+    token.transferFrom(msg.sender, address(this),  quantity);
 
     ERC20MintableBurnableToken tl_token = ERC20MintableBurnableToken(tokenLaunchCampaign[_tokenLaunchName]._temporaryLiquidityToken);
     tl_token.mint(msg.sender, quantity);
