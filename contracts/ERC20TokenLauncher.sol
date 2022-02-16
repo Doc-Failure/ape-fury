@@ -28,7 +28,7 @@ contract ERC20TokenLauncher {
   function setUpTokenLaunchCampaign(address _tokenAddr, uint128 _percentageEarlyUsersPool, uint128 _percentageLiquidityPool, uint128 _daysBeforeExpiring, string memory _tokenLaunchName ) public {
     require(_percentageEarlyUsersPool>0 && _percentageEarlyUsersPool<100);
     require(_percentageLiquidityPool>0 && _percentageLiquidityPool<100);
-    //require(_daysBeforeExpiring>0 && _percentageLiquidityPool<180);
+    require(_daysBeforeExpiring>0 && _percentageLiquidityPool<180);
     require(tokenLaunchCampaign[_tokenLaunchName]._campaignOwner==0x0000000000000000000000000000000000000000 || msg.sender==tokenLaunchCampaign[_tokenLaunchName]._campaignOwner);
     ERC20 token = ERC20(_tokenAddr);
     uint256 totalSupply = token.totalSupply();
@@ -80,6 +80,11 @@ contract ERC20TokenLauncher {
     token.transfer(msg.sender, quantityToMove);
 
     tl_token.burnFrom(msg.sender, (quantity * 10 ** 18));
+  }
+
+  //only for test purpose
+  function resetButton() public{
+    delete listOfTokenLaunchCampaigns;
   }
 
 }
