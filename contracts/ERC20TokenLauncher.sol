@@ -55,10 +55,10 @@ contract ERC20TokenLauncher {
 
 
   function fundTokenLaunchCampaign(string memory _tokenLaunchName, uint256 quantity ) external {
-    require(tokenLaunchCampaign[_tokenLaunchName]._campaignOwner!=0x0000000000000000000000000000000000000000, "LaunchCampaign has not been approved yet");
+    require(tokenLaunchCampaign[_tokenLaunchName]._campaignOwner==0x0000000000000000000000000000000000000000, "LaunchCampaign has not been approved yet");
     
     //Wrapped Near Fungible Token
-    ERC20Token token = ERC20Token(0x4861825E75ab14553E5aF711EbbE6873d369d146);
+    ERC20 token = ERC20(0x4861825E75ab14553E5aF711EbbE6873d369d146);
     token.transferFrom(msg.sender, address(this),  quantity);
 
     ERC20MintableBurnableToken tl_token = ERC20MintableBurnableToken(tokenLaunchCampaign[_tokenLaunchName]._temporaryLiquidityToken);
