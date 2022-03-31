@@ -6,16 +6,17 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
   const { deployer } = await getNamedAccounts();
 
   const chainId = await getChainId();
-
   let wethAddress;
 
-  if (chainId === "31337") {
+  if (chainId === "31337" || chainId === "365") {
     wethAddress = (await deployments.get("WETH9Mock")).address;
   } else if (chainId in WETH9) {
     wethAddress = WETH9[chainId].address;
   } else {
     throw Error("No WETH!");
   }
+
+  console.log("--------- wethAddress: "+wethAddress);
 
   const factoryAddress = (await deployments.get("UniswapV2Factory")).address;
 

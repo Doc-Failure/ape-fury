@@ -57,6 +57,12 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
+    theta_testnet: {
+      url: 'https://eth-rpc-api-testnet.thetatoken.org/rpc',
+      accounts,
+      chainId: 365,
+      gasPrice: 4000000000000,
+    },
     aurora_testnet: {
       url: 'https://testnet.aurora.dev',
       accounts,
