@@ -13,7 +13,7 @@ module.exports = async function ({ ethers: { getNamedSigner }, getNamedAccounts,
   
   let wethAddress;
   
-  if (chainId === '31337') {
+  if (chainId === '31337' || chainId === '365') {
     wethAddress = (await deployments.get("WETH9Mock")).address
   } else if (chainId in WETH9) {
     wethAddress = WETH9[chainId].address
@@ -36,4 +36,4 @@ module.exports = async function ({ ethers: { getNamedSigner }, getNamedAccounts,
 }
 
 module.exports.tags = ["SushiMaker"]
-module.exports.dependencies = ["UniswapV2Factory", "UniswapV2Router02", "SushiBar", "SushiToken"]
+module.exports.dependencies = ["Mocks", "UniswapV2Factory", "UniswapV2Router02", "SushiBar", "SushiToken"]
