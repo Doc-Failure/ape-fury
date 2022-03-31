@@ -10,6 +10,7 @@ analyze:
     remappings:
         - "@openzeppelin=node_modules/@openzeppelin"
     targets:
+        - contracts/mocks/WETH9Mock.sol:WETH9Mock
         - contracts/SushiMaker.sol:SushiMaker
         - contracts/uniswapv2/UniswapV2Pair.sol:UniswapV2Pair
         - contracts/uniswapv2/UniswapV2Factory.sol:UniswapV2Factory

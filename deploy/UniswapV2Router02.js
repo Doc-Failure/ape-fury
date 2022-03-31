@@ -8,8 +8,20 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
   const chainId = await getChainId();
   let wethAddress;
 
+  console.log("--------- chainId: "+chainId);
   if (chainId === "31337" || chainId === "365") {
-    wethAddress = (await deployments.get("WETH9Mock")).address;
+    console.log("OKOKOKOKOKOK????");
+
+
+    const {address} = await deploy("WETH9Mock", {
+      from: deployer,
+      log: true,
+      deterministicDeployment: false
+    })
+    wethAddress=address;
+
+   /*  wethAddress = (await deployments.get("WETH9Mock")).address; */
+    console.log("wethAddress: "+wethAddress);
   } else if (chainId in WETH9) {
     wethAddress = WETH9[chainId].address;
   } else {
